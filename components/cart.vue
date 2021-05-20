@@ -15,14 +15,23 @@ export default {
     props : {checkedBoxes : Array},
     data: function(){
         return{
-            total : []
+            total : [], 
+            progIDs : [],
+            names : []
         }
 
     },
     methods : {
         updateCart : function(){
+            //split into two arrays 
             for (var i = 0; i < this.checkedBoxes.length; i++){
-                this.total.push(this.checkedBoxes[i]);
+                //split based on the location of "=" 
+                var temp = this.checkedBoxes[i];
+                var ind = temp.indexOf("=");
+                var tempID = temp.substring(0, ind);
+                var tempName = temp.substring(ind+1, temp.length);
+                progIDs.push(tempID);
+                names.push(tempName);
             }
             console.log(this.total)
         }

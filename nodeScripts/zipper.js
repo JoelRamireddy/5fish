@@ -2,6 +2,7 @@
 const VERSION_NUMBER = "7";
 const MAX_ATTEMPTS = 3; //maximum number of times to attempt downloading a file before giving up
 const DOWNLOAD_DIR = "./downloads"
+const FAIL_DELAY = 10000; //wait this many ms between download attempts
 
 // Include AdmZip class
 var AdmZip = require("adm-zip");
@@ -42,9 +43,9 @@ emitter.on("get_json_file", function getJsonFile(programId, outputFile, numAttem
 	}
 	catch(error){
 		//log the error
-		console.log("\nEncountered error with " + jsonFilename +  " download: ");
-		console.error(error);
-		console.log("\n");
+		console.log("\nEncountered error with " + jsonFilename +  " download: \n");
+		//console.log(error + "\n");
+
 		//error was likely just too many requests, but coould be any kind of network error
 		if(numAttempts < MAX_ATTEMPTS){
 			console.log("Getting " + jsonFilename + " again");
@@ -66,67 +67,64 @@ emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilen
 
 	console.log("getting " + zipFilename);
 	//catch any HTTP request errors
-	try{
-		download(zipUrl, DOWNLOAD_DIR)
-		.then(() => {
-			console.log("got " + zipFilename);
-			// Edit existing zip file
-			var zip;
-			try{
-				//it is now in a folder which shares it's name
-				zip = new AdmZip(DOWNLOAD_DIR+"/"+zipFilename);
-			}catch(error){
-				//log the error
-				console.log("\nError with " + zipFilename + "; oppening file led to an error:");
-				console.error(error);
+	download(zipUrl, DOWNLOAD_DIR)
+	.then(() => {
+		console.log("got " + zipFilename);
+		// Edit existing zip file
+		var zip;
+		try{
+			//it is now in a folder which shares it's name
+			zip = new AdmZip(DOWNLOAD_DIR+"/"+zipFilename);
+		}catch(error){
+			//log the error
+			console.log("\nError with " + zipFilename + "; oppening file led to an error:");
+			console.log(error + "\n");
 
-				//delete the old file
-				//fs.unlinkSync(zipFilename);
-				return;
-			}
+			//delete the old file
+			//fs.unlinkSync(zipFilename);
+			return;
+		}
 
-			const language = jsonData.languages[0].value;
-			//this inner_dir is in english, while the audio files are in the directory written in their language
-			//const inner_dir = language+" "+jsonData.title+" "+programId;
-			//this inner_dir makes it match
-			const inner_dir = audioDirName;
-			console.log(inner_dir);
+		const language = jsonData.languages[0].value;
+		//this inner_dir is in english, while the audio files are in the directory written in their language
+		//const inner_dir = language+" "+jsonData.title+" "+programId;
+		//this inner_dir makes it match
+		const inner_dir = audioDirName;
+		console.log(inner_dir);
 
-			zip.addLocalFile(jsonFilename, language+"/"+inner_dir);
+		zip.addLocalFile(jsonFilename, language+"/"+inner_dir);
 
-			//resolve corruption issues with unicode characters 
-			zip.getEntries().forEach(entry => {
-				entry.header.made = 0x314;     //this may be OS specific
-				entry.header.flags |= 0x800;   // Set bit 11 - APP Note 4.4.4 Language encoding flag (EFS)
-			});
-
-
-			zip.writeZip(DOWNLOAD_DIR+"/"+zipFilename);
-
-			//store the zip file downloaded and the language of the program
-			zipInfo.push({file: DOWNLOAD_DIR+"/"+zipFilename, lang: language, dir: inner_dir}); 
-
-			//keep track of how many programs have been processed and only finish after last
-			numProgsDone++;
-			if(numProgsDone == numProgs){
-				emitter.emit("finish", outputFile);
-			}
+		//resolve corruption issues with unicode characters 
+		zip.getEntries().forEach(entry => {
+			entry.header.made = 0x314;     //this may be OS specific
+			entry.header.flags |= 0x800;   // Set bit 11 - APP Note 4.4.4 Language encoding flag (EFS)
 		});
-	}
-	catch(error){
+
+		zip.writeZip(DOWNLOAD_DIR+"/"+zipFilename);
+
+		//store the zip file downloaded and the language of the program
+		zipInfo.push({file: DOWNLOAD_DIR+"/"+zipFilename, lang: language, dir: inner_dir}); 
+
+		//keep track of how many programs have been processed and only finish after last
+		numProgsDone++;
+		if(numProgsDone == numProgs){
+			emitter.emit("finish", outputFile);
+		}
+	})
+	.catch(error => {
 		//wait a second and then try again, up to MAX_ATTEMPTS times
-		console.log("\nRecived the following error while downloading: ");
-		console.error(error);
-		console.log(); //just add and endline before and after errors
+		console.log("\nRecived the following error while downloading zip: \n");
+		console.log(error + "\n");
 
 		if(numAttempts < MAX_ATTEMPTS){
-			console.log("Getting " + zipFilename + " again");
+			console.log("Getting " + zipFilename + " again in " + FAIL_DELAY + "ms");
 			numAttempts++;
-			emitter.emit("get_zip_file", zipFilename, programId, jsonFilename, jsonData, audioDirName, outputFile, numAttempts);
+			//wait for delay
+			setTimeout(() => {emitter.emit("get_zip_file", zipFilename, programId, jsonFilename, jsonData, audioDirName, outputFile, numAttempts)}, FAIL_DELAY);
 		}else {
 			console.log("Failed to download " + zipFilename + " " + numAttempts + " times. Giving up");
-		}		
-	}
+		}	
+	});
 });
 
 
@@ -149,65 +147,66 @@ emitter.on("get_mp3_file", function getZipFile(zipFilename, programId, jsonFilen
 			//const inner_dir = language+" "+jsonData.title+" "+programId;
 			//this inner_dir makes it match
 	const inner_dir = audioDirName;
+	download(mp3Url, DOWNLOAD_DIR)
+	.then(() => {
+		console.log("got " + mp3FileName);
 
-	try{
-		download(mp3Url, DOWNLOAD_DIR)
-		.then(() => {
-			console.log("got " + mp3FileName);
+		//the file will be ####.mp3 inside of a folder with name mp3FileName
 
-			//the file will be ####.mp3 inside of a folder with name mp3FileName
-
-			// Edit existing zip file
-			var zip;
-			try{
-				zip = new AdmZip();
-				zip.addLocalFile(DOWNLOAD_DIR+"/"+programId + ".mp3", language+"/"+inner_dir);
-			}catch(error){
-				//log the error
-				console.log("\nError with " + mp3FileName + "; oppening file led to the error:");
-				console.error(error);
-				
-				//delete the old file
-				//fs.unlinkSync(programId + ".mp3");
-				//try again
-				//emitter.emit("get_zip_file", zipFilename, programId, jsonFilename, jsonData, audioDirName, outputFile);
-				return;
-			}
+		// Edit existing zip file
+		var zip;
+		try{
+			zip = new AdmZip();
+			zip.addLocalFile(DOWNLOAD_DIR+"/"+programId + ".mp3", language+"/"+inner_dir);
+		}catch(error){
+			//log the error
+			console.log("\nError with " + mp3FileName + "; oppening file led to the error:");
+			console.log(error + "\n");
+			
+			//delete the old file
+			//fs.unlinkSync(programId + ".mp3");
+			//try again
+			//emitter.emit("get_zip_file", zipFilename, programId, jsonFilename, jsonData, audioDirName, outputFile);
+			return;
+		}
 
 			
-			console.log(inner_dir);
+		console.log(inner_dir);
 
-			zip.addLocalFile(jsonFilename, language+"/"+inner_dir);
+		zip.addLocalFile(jsonFilename, language+"/"+inner_dir);
 
-			//resolve corruption issues with unicode characters 
-			zip.getEntries().forEach(entry => {
-				entry.header.made = 0x314;     //this may be OS specific
-				entry.header.flags |= 0x800;   // Set bit 11 - APP Note 4.4.4 Language encoding flag (EFS)
-			});
-
-
-			zip.writeZip(DOWNLOAD_DIR+"/"+zipFilename);
-
-			//store the zip file downloaded and the language of the program
-			zipInfo.push({file: DOWNLOAD_DIR+"/"+zipFilename, lang: language, dir: inner_dir}); 
-
-			//keep track of how many programs have been processed and only finish after last
-			numProgsDone++;
-			if(numProgsDone == numProgs){
-				emitter.emit("finish", outputFile);
-			}
+		//resolve corruption issues with unicode characters 
+		zip.getEntries().forEach(entry => {
+			entry.header.made = 0x314;     //this may be OS specific
+			entry.header.flags |= 0x800;   // Set bit 11 - APP Note 4.4.4 Language encoding flag (EFS)
 		});
-	}
-	catch {
-		//if this error has happened less than MAX_ATTEMPTS, try again. Otherwise, give up and notify user
+
+
+		zip.writeZip(DOWNLOAD_DIR+"/"+zipFilename);
+
+		//store the zip file downloaded and the language of the program
+		zipInfo.push({file: DOWNLOAD_DIR+"/"+zipFilename, lang: language, dir: inner_dir}); 
+
+		//keep track of how many programs have been processed and only finish after last
+		numProgsDone++;
+		if(numProgsDone == numProgs){
+			emitter.emit("finish", outputFile);
+		}
+	})
+	.catch(error => {
+		console.log("/nRecived error with MP3 download: ");
+		console.log(error + "/n");
+
+		//try again after delay if okay
 		if(numAttempts < MAX_ATTEMPTS){
-			console.log("Getting " + mp3FileName + " again");
+			console.log("Getting " + mp3FileName + " again in " + FAIL_DELAY + "ms");
 			numAttempts++;
-			emitter.emit("get_mp3_file", zipFilename, programId, jsonFilename, jsonData, audioDirName, outputFile, 0);
+			//wait for the delay
+			setTimeout(() => {emitter.emit("get_mp3_file", zipFilename, programId, jsonFilename, jsonData, audioDirName, outputFile, numAttempts)}, FAIL_DELAY);
 		}else {
 			console.log("Failed to download " + mp3FileName + " " + numAttempts + " times. Giving up");
 		}
-	}
+	});
 });
 
 

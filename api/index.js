@@ -4,9 +4,9 @@ const app = express()
 
 
 app.get('/region/', (req, res) => {
-
+    
 	let db = new sqlite3.Database('./5fish.db');
-
+	
     let sql = `select  grn_location_id, default_location_name 
            from Location 
            where Location.parent_location_id is null`;
@@ -23,11 +23,11 @@ app.get('/region/', (req, res) => {
 
 	// close the database connection
 	db.close();
-
+	
 })
 
 app.get('/country/:what', (req, res) => {
-
+    
 	let db = new sqlite3.Database('./5fish.db');
     let sql = `select grn_location_id, default_location_name 
 	from Location 
@@ -48,11 +48,11 @@ app.get('/country/:what', (req, res) => {
 
 	// close the database connection
 	db.close();
-
+	
 })
 
 app.get('/languages/:what', (req, res) => {
-
+    
 	let db = new sqlite3.Database('./5fish.db');
     let sql = `select Languages.grn_language_id as langID, Languages.default_language_name as langName
 	from Languages inner join LocationLanguages on 
@@ -72,11 +72,11 @@ app.get('/languages/:what', (req, res) => {
 
 	// close the database connection
 	db.close();
-
+	
 })
 
 app.get('/programs/:what', (req, res) => {
-
+    
 	let db = new sqlite3.Database('./5fish.db');
     let sql = `select Programs.grn_program_id as progID, Programs.default_program_title as progName
 	from Languages inner join LanguagesPrograms on 
@@ -95,7 +95,7 @@ app.get('/programs/:what', (req, res) => {
 
 	// close the database connection
 	db.close();
-
+	
 })
 
 app.get('/download/:what',(req,res) => {
@@ -116,7 +116,7 @@ app.get('/download/:what',(req,res) => {
 		// Get JSON data
 		var jsonUrl = "https://api.s.globalrecordings.net/feeds/set/"+programId+"?app=6";
 		var jsonFilename = programId+"."+VERSION_NUMBER+".json";
-
+		
 		const https = require("https");
 		const fs = require("fs");
 		var file = fs.createWriteStream(jsonFilename);
@@ -143,7 +143,7 @@ app.get('/download/:what',(req,res) => {
 		const https = require("https");
 		const fs = require("fs");
 		const download = require('download');
-
+		
 		var zipUrl = "https://api.globalrecordings.net/files/set/mp3-low/"+programId+".zip";
 
 		console.log("getting " + zipFilename);
@@ -210,7 +210,7 @@ app.get('/download/:what',(req,res) => {
 		var mp3FileName = zipFilename.substring(0, zipFilename.length - 3);
 		mp3FileName =  `${__dirname}` + "/" + mp3FileName + "mp3";
 		console.log("getting " + mp3FileName + " from " + mp3Url);
-
+		
 
 
 		//need this sooner now...
@@ -236,7 +236,7 @@ app.get('/download/:what',(req,res) => {
 					//log the error
 					console.log("\nFailed to download file " + zipFilename + "; oppening file led to the error:");
 					//console.error(error);
-
+					
 					//delete the old file
 					//fs.unlinkSync(programId + ".mp3");
 					//try again
@@ -244,7 +244,7 @@ app.get('/download/:what',(req,res) => {
 					return;
 				}
 
-
+				
 				console.log(inner_dir);
 
 				zip.addLocalFile(jsonFilename, language+"/"+inner_dir);
@@ -289,7 +289,7 @@ app.get('/download/:what',(req,res) => {
 			zip.addLocalFolder("./"+newFolderName+"/"+val.lang+"/"+val.dir,"/"+val.lang+"/"+val.dir);
 		});
 
-
+		
 
 		//resolve corruption issues with unicode characters 
 		zip.getEntries().forEach(entry => {
@@ -314,7 +314,7 @@ app.get('/download/:what',(req,res) => {
 	createZip(args);
 
 	function createZip(args){
-
+		
 		var programIds = new Array();
 		numProgs = args.length - 1;
 		console.log(numProgs);
@@ -324,7 +324,7 @@ app.get('/download/:what',(req,res) => {
 			console.log("Usage: node zipper.js <outputFile> <inputFile1> ...");
 			return;
 		}
-
+		
 		args.forEach((val, index) => {
 			programIds.push(val);
 		});
@@ -346,4 +346,4 @@ app.get('/download/:what',(req,res) => {
 module.exports = {
    path: '/api',
    handler: app
-} 
+}
