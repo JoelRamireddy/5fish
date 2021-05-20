@@ -27,7 +27,7 @@
   <div class="container">
     <ul id="lister">
       <li v-for="program in programs" v-bind:key="program.progName">
-        <input type="checkbox" v-bind:id = "program.progID" v-model="checkedBoxes" :value="program.progID">
+        <input type="checkbox" v-bind:id = "program.progID" v-model="checkedBoxes" :value="program.progID + '= ' + program.progName" >
         {{program.progName}}
       </li>
     </ul>
@@ -36,10 +36,13 @@
     <button v-on:click = "sendData">Get Programs</button>
     <span>checked names: {{checkedBoxes}}</span>
   </div>
+  <cart ref = "form" v-bind:checkedBoxes = "checkedBoxes"/>
 </div>
+
 </template>
 
 <script>
+import cart from '~/components/cart';
 export default {
 data: function() {
     return {
@@ -63,6 +66,7 @@ data: function() {
       const axios = require('axios');
       axios.get('http://localhost:3000/api/country/' + (this.selectedContinent).toString())
       .then(response => (this.countries = response.data));
+      
     },
     selectedCountry: function() {
       // Clear previously selected values
@@ -86,8 +90,11 @@ created(){
 },
 methods: {
   sendData: function(){
-    console.log(this.checkedBoxes);
+    this.$refs.form.updateCart()
   }
+},
+components:{
+  cart
 }
 }
 </script>

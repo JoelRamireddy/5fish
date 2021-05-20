@@ -8,9 +8,10 @@
 <script>
 import selectorBar from '~/components/selectorBar';
 
+
 export default{
 components: {
-    selectorBar
+    selectorBar,
 }
 }
 </script>
