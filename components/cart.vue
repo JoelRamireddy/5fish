@@ -1,4 +1,3 @@
-
 <template>
 <div>
   <div class="something">
@@ -23,7 +22,6 @@ export default {
             names : [],
             done : true
         }
-
     },
     methods : {
         updateCart : function(){
@@ -49,17 +47,15 @@ export default {
         },
         downloadCart : function(){
             console.log(this.fileName)
-            alert('Your Download has Begun.')
+            alert('Your Download has Begun. This may take a few minutes.')
             const axios = require('axios');
             const FileDownload = require('js-file-download');
-
             //file types
             const GRN_VIDEO = "GV:";
             const JESUS_FILM = "JF:";
             const LANG_SAMPLE = "LS";
             const IMAGE = "IM";
             const GRN_AUDIO = "GA";
-
             var addToString = "GRN." + this.fileName + ".zip-";
             for(var i = 0; i < this.progIDs.length-1; i++){
                 //make all audio by default, make this dynamic later; frontend can't do 
@@ -83,7 +79,6 @@ export default {
 
 <style>
 .something { 
-
   border:2px solid #526488; 
   width:500px; 
   height: 350px;
@@ -92,9 +87,7 @@ export default {
   display: inline-block;
   left: 100%;
   transform: translate(-100%, -100%);}
-
   
-
   #download{
       position: relative;
       left:19%;
@@ -104,5 +97,4 @@ export default {
       position: relative;
       left: 19%;
   }
-
 </style>

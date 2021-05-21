@@ -19,6 +19,24 @@ $ npm run generate
 
 For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
 
+# Frontend structure:
+
+Layer structure of the website:
+default -> AppHeader -> [home, programs, about]
+programs -> selectorBar -> cart
+
+cart acts as the child of selectorBar and there is an exchange of data between those components.
+
+home and about are experimental pages that are used to show that this webpage can be integrated with the nuxt framework that GRN is beginning to implement.
+
+index.js in the api folder contains all the code for our apis.(Express.js).
+
+API:
+'/region/', '/country/:what' and '/languages/:what' are used for the drop downs.
+'/programs/:what' is used to populate all the available programs.
+'/download/:what' is the api that handles the download and the zipping on the server side. It also sends the file to the client for download.
+
+
 # Backend Program Flow:
 
 The backend zip creator is broken into a callable function and several asychronus events, all found inside of the API index file. The program flow works as follows:
