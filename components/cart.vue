@@ -1,3 +1,4 @@
+
 <template>
 <div>
   <div class="something">
@@ -14,7 +15,7 @@
 
 <script>
 export default {
-    props : {checkedBoxes : Array},
+    props : {checkedBoxes : Array, PORT_NUMBER : String},
     data: function(){
         return{
             total : [], 
@@ -58,7 +59,7 @@ export default {
             // axios.get('http://localhost:3000/api/download/' + addToString).then(response => (this.places = response.data));
             this.done = true;
             axios({
-            url: 'http://localhost:51588/api/download/' + addToString,
+            url: 'http://localhost:3000/api/download/' + addToString,
             method: 'GET',
             responseType: 'blob', // Important
                 }).then((response) => {
@@ -88,6 +89,10 @@ export default {
       position: relative;
       left:19%;
       transform: translate(-50%, -2200%)
+  }
+  .bar{
+      position: relative;
+      left: 19%;
   }
 
 </style>
