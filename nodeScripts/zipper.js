@@ -279,8 +279,10 @@ emitter.on("finish", function zipFile(outputFile) {
 	console.log("Done");
 });
 
-function createZip(args){
+export function createZip(args){
 	//set up drectories
+	var newDir = (Math.floor(Math.random()*1000)).toString();
+	custDir = DOWNLOAD_DIR + "/" + newDir;
 	fs.mkdirSync(custDir);
 
 
@@ -320,8 +322,8 @@ let progInd = 0; //use this to keep track of which program to download next
 let programIds = new Array();
 
 //make a unqiue directory for this specific request set
-var newDir = (Math.floor(Math.random()*1000)).toString();
-let custDir = DOWNLOAD_DIR + "/" + newDir;
+
+let custDir;
 
 // Retrieve cmd line args
 const args = process.argv.slice(2);
