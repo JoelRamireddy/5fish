@@ -27,7 +27,7 @@
   <div class="container">
     <ul id="lister">
       <li v-for="program in programs" v-bind:key="program.progName">
-        <input type="checkbox" v-bind:id = "program.progID" v-model="checkedBoxes" :value="program.progID + '= ' + program.progName  + '-' + document.getElementById(selectedLang)">
+        <input type="checkbox" v-bind:id = "program.progID" v-model="checkedBoxes" :value="program.progID + '= ' + program.progName  + '-' + program.langName">
         {{program.progName}}
       </li>
     </ul>

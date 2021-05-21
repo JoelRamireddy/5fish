@@ -83,7 +83,7 @@ app.get('/programs/:what', (req, res) => {
 	from Languages inner join LanguagesPrograms on
 		(Languages.grn_language_id = LanguagesPrograms.language_id)
 		 inner join Programs on (Programs.grn_program_id = LanguagesPrograms.program_id)
-	where Languages.grn_language_id = 23`;
+	where Languages.grn_language_id = ?`;
 	db.all(sql, [req.params.what], (err, rows) => {
 		if (err) {
 			throw err;
