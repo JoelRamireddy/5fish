@@ -20,14 +20,14 @@
           <span>Language:</span>
           <select :disabled="languages.length == 0" v-model="selectedLang">
               <option value="">Select a Language</option>
-              <option v-bind:value = "language.langID" v-for="language in languages" v-bind:key="language.langName">{{language.langName}}</option>
+              <option v-bind:id = "language.langID" v-bind:value = "language.langID" v-for="language in languages" v-bind:key="language.langName">{{language.langName}}</option>
           </select>
       </div>
   </div>
   <div class="container">
     <ul id="lister">
       <li v-for="program in programs" v-bind:key="program.progName">
-        <input type="checkbox" v-bind:id = "program.progID" v-model="checkedBoxes" :value="program.progID + '= ' + program.progName" >
+        <input type="checkbox" v-bind:id = "program.progID" v-model="checkedBoxes" :value="program.progID + '= ' + program.progName  + '-' + document.getElementById(selectedLang)">
         {{program.progName}}
       </li>
     </ul>
