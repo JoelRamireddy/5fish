@@ -279,9 +279,11 @@ emitter.on("finish", function zipFile(outputFile) {
 	console.log("Done");
 });
 
-export function createZip(args){
+
+function createZip(args){
 	//set up drectories
-	var newDir = (Math.floor(Math.random()*1000)).toString();
+	var d = new Date();
+	var newDir = (Math.floor(d.getTime()*1000)).toString();
 	custDir = DOWNLOAD_DIR + "/" + newDir;
 	fs.mkdirSync(custDir);
 
@@ -325,9 +327,7 @@ let programIds = new Array();
 
 let custDir;
 
-// Retrieve cmd line args
-const args = process.argv.slice(2);
-createZip(args);
+
 
 
 

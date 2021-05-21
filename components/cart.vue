@@ -46,10 +46,10 @@ export default {
         downloadCart : function(){
             const axios = require('axios');
             var addToString = "";
-            for(var i = 0; i < this.progIds.length-1; i++){
-                addToString += progIds[i].toString() + ".";
+            for(var i = 0; i < this.progIDs.length-1; i++){
+                addToString += this.progIDs[i].toString() + ".";
             }
-            addToString += progIds[progIds.length-1];
+            addToString += this.progIDs[this.progIDs.length-1];
             axios.get('http://localhost:3000/api/download/' + addToString).then(response => (this.places = response.data));
         }
     }
