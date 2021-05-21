@@ -79,11 +79,11 @@ app.get('/languages/:what', (req, res) => {
 app.get('/programs/:what', (req, res) => {
 
 	let db = new sqlite3.Database('./5fish.db');
-    let sql = `select Programs.grn_program_id as progID, Programs.default_program_title as progName
+    let sql = `select Programs.grn_program_id as progID, Programs.default_program_title as progName, Languages.default_language_name as langName
 	from Languages inner join LanguagesPrograms on
 		(Languages.grn_language_id = LanguagesPrograms.language_id)
 		 inner join Programs on (Programs.grn_program_id = LanguagesPrograms.program_id)
-	where Languages.grn_language_id = ?`;
+	where Languages.grn_language_id = 23`;
 	db.all(sql, [req.params.what], (err, rows) => {
 		if (err) {
 			throw err;
