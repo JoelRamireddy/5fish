@@ -4,11 +4,11 @@ const app = express()
 
 
 app.get('/region/', (req, res) => {
-    
+
 	let db = new sqlite3.Database('./5fish.db');
-	
-    let sql = `select  grn_location_id, default_location_name 
-           from Location 
+
+    let sql = `select  grn_location_id, default_location_name
+           from Location
            where Location.parent_location_id is null`;
 
 	db.all(sql, [], (err, rows) => {
@@ -23,17 +23,17 @@ app.get('/region/', (req, res) => {
 
 	// close the database connection
 	db.close();
-	
+
 })
 
 app.get('/country/:what', (req, res) => {
-    
+
 	let db = new sqlite3.Database('./5fish.db');
-    let sql = `select grn_location_id, default_location_name 
-	from Location 
-	where Location.parent_location_id in 
-		(select Location.grn_location_id 
-		from Location 
+    let sql = `select grn_location_id, default_location_name
+	from Location
+	where Location.parent_location_id in
+		(select Location.grn_location_id
+		from Location
 		where Location.parent_location_id = ?)`;
 
 	db.all(sql, [req.params.what], (err, rows) => {
@@ -48,14 +48,14 @@ app.get('/country/:what', (req, res) => {
 
 	// close the database connection
 	db.close();
-	
+
 })
 
 app.get('/languages/:what', (req, res) => {
-    
+
 	let db = new sqlite3.Database('./5fish.db');
     let sql = `select Languages.grn_language_id as langID, Languages.default_language_name as langName
-	from Languages inner join LocationLanguages on 
+	from Languages inner join LocationLanguages on
 		(Languages.grn_language_id = LocationLanguages.language_id)
 		 inner join Location on (LocationLanguages.location_id = Location.grn_location_id)
 	where Location.grn_location_id = ?`;
@@ -72,14 +72,14 @@ app.get('/languages/:what', (req, res) => {
 
 	// close the database connection
 	db.close();
-	
+
 })
 
 app.get('/programs/:what', (req, res) => {
-    
+
 	let db = new sqlite3.Database('./5fish.db');
     let sql = `select Programs.grn_program_id as progID, Programs.default_program_title as progName
-	from Languages inner join LanguagesPrograms on 
+	from Languages inner join LanguagesPrograms on
 		(Languages.grn_language_id = LanguagesPrograms.language_id)
 		 inner join Programs on (Programs.grn_program_id = LanguagesPrograms.program_id)
 	where Languages.grn_language_id = ?`;
@@ -95,7 +95,7 @@ app.get('/programs/:what', (req, res) => {
 
 	// close the database connection
 	db.close();
-	
+
 })
 
 app.get('/download/:what',(req,res) => {
@@ -104,8 +104,8 @@ app.get('/download/:what',(req,res) => {
 	// Version number declared in JSON
 const VERSION_NUMBER = "7";
 const MAX_ATTEMPTS = 3;  //maximum number of times to attempt downloading a file before giving up
-const MAX_DOWNLOADS = 2; //maximum number of simultaneous downloads per program 
-const DOWNLOAD_DIR = "C:/Users/joela/5fishInterface/nodeScripts"
+const MAX_DOWNLOADS = 2; //maximum number of simultaneous downloads per program
+const DOWNLOAD_DIR = "./downloads"
 const FAIL_DELAY = 5000; //wait this many ms between download attempts
 
 // Include AdmZip class
@@ -127,7 +127,7 @@ emitter.on("get_json_file", function getJsonFile(programId, outputFile, numAttem
 	// Get JSON data
 	var jsonUrl = "https://api.s.globalrecordings.net/feeds/set/"+programId+"?app=6";
 	var jsonFilename = custDir+"/"+programId+"."+VERSION_NUMBER+".json";
-	
+
 	const https = require("https");
 	var file = fs.createWriteStream(jsonFilename);
 	try{
@@ -166,14 +166,14 @@ emitter.on("get_json_file", function getJsonFile(programId, outputFile, numAttem
 			console.log("Failed to download " + jsonFilename + " " + numAttempts + " times. Giving up");
 			wasError = true;
 			numProgsDone++;
-		}	
+		}
 	}
 });
 
 emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilename, jsonData, audioDirName, outputFile, numAttempts) {
 	const https = require("https");
 	const download = require('download');
-	
+
 	var zipUrl = "https://api.globalrecordings.net/files/set/mp3-low/"+programId+".zip";
 
 	console.log("Getting " + zipFilename);
@@ -215,13 +215,13 @@ emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilen
 		//const inner_dir = language+" "+jsonData.title+" "+programId;
 		//this inner_dir makes it match
 		const inner_dir = audioDirName;
-		
+
 
 		//console.log(inner_dir);
 
 		zip.addLocalFile(jsonFilename, language+"/"+inner_dir);
 
-		//resolve corruption issues with unicode characters 
+		//resolve corruption issues with unicode characters
 		zip.getEntries().forEach(entry => {
 			entry.header.made = 0x314;     //this may be OS specific
 			entry.header.flags |= 0x800;   // Set bit 11 - APP Note 4.4.4 Language encoding flag (EFS)
@@ -230,7 +230,7 @@ emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilen
 		zip.writeZip(custDir+"/"+zipFilename);
 
 		//store the zip file downloaded and the language of the program
-		zipInfo.push({file: custDir+"/"+zipFilename, lang: language, dir: inner_dir}); 
+		zipInfo.push({file: custDir+"/"+zipFilename, lang: language, dir: inner_dir});
 
 		//keep track of how many programs have been processed and only finish after last
 		numProgsDone++;
@@ -256,7 +256,7 @@ emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilen
 			console.log("Failed to download " + zipFilename + " " + numAttempts + " times. Giving up");
 			wasError = true;
 			numProgsDone++;
-		}	
+		}
 	});
 });
 
@@ -294,7 +294,7 @@ emitter.on("get_mp3_file", function getZipFile(zipFilename, programId, jsonFilen
 			//log the error
 			console.log("\nError with " + mp3FileName + "; oppening file led to the error:");
 			console.log(error + "\n");
-			
+
 			//delete the old file
 			//fs.unlinkSync(programId + ".mp3");
 			//try again
@@ -302,12 +302,12 @@ emitter.on("get_mp3_file", function getZipFile(zipFilename, programId, jsonFilen
 			return;
 		}
 
-			
+
 		console.log(inner_dir);
 
 		zip.addLocalFile(jsonFilename, language+"/"+inner_dir);
 
-		//resolve corruption issues with unicode characters 
+		//resolve corruption issues with unicode characters
 		zip.getEntries().forEach(entry => {
 			entry.header.made = 0x314;     //this may be OS specific
 			entry.header.flags |= 0x800;   // Set bit 11 - APP Note 4.4.4 Language encoding flag (EFS)
@@ -317,7 +317,7 @@ emitter.on("get_mp3_file", function getZipFile(zipFilename, programId, jsonFilen
 		zip.writeZip(custDir+"/"+zipFilename);
 
 		//store the zip file downloaded and the language of the program
-		zipInfo.push({file: custDir+"/"+zipFilename, lang: language, dir: inner_dir}); 
+		zipInfo.push({file: custDir+"/"+zipFilename, lang: language, dir: inner_dir});
 
 		//keep track of how many programs have been processed and only finish after last
 		numProgsDone++;
@@ -359,7 +359,7 @@ emitter.on("finish", function zipFile(outputFile) {
 //node: if we do it by file, just use the getEntries and pull out files by name to get entryName to extract file by file
 		var tempZip = new AdmZip(val.file);
 		var newFolderName = custDir+"/temp"; //want to erase previous work every time
-		tempZip.extractAllTo(newFolderName, true); 
+		tempZip.extractAllTo(newFolderName, true);
 		//var entry = tempZip.getEntry(val.lang);
 		console.log(newFolderName+"/"+val.lang+"/"+val.dir,"/"+val.lang);
 
@@ -367,9 +367,9 @@ emitter.on("finish", function zipFile(outputFile) {
 		zip.addLocalFolder(newFolderName+"/"+val.lang+"/"+val.dir,"/"+val.lang+"/"+val.dir);
 	});
 
-	
 
-	//resolve corruption issues with unicode characters 
+
+	//resolve corruption issues with unicode characters
 	zip.getEntries().forEach(entry => {
 		entry.header.made = 0x314;     //this may be OS specific, need to look into that
 		entry.header.flags |= 0x800;   // Set bit 11 - APP Note 4.4.4 Language encoding flag (EFS)
@@ -400,22 +400,23 @@ function createZip(args){
 		console.log("Usage: node zipper.js <outputFile> <inputFile1> ...");
 		return;
 	}
-	
+
 	args.forEach((val, index) => {
 		programIds.push(val);
 	});
 
-	//now request each item retrieved	
+	//now request each item retrieved
 	var AdmZip = require("adm-zip");
 	var zipFile = new AdmZip();
 
 	var outputFile = programIds[0];
 	programIds = programIds.slice(1);
 
-	//do the first MAX_DOWNLOADS 
+	//do the first MAX_DOWNLOADS
 	for(progInd = 0 ; progInd < MAX_DOWNLOADS ; progInd++){
 		emitter.emit("get_json_file", programIds[progInd], outputFile, 0);
 	}
+  return newDir;
 }
 
 const fs = require("fs");
