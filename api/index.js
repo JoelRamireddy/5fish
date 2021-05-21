@@ -105,7 +105,7 @@ app.get('/download/:what',(req,res) => {
 const VERSION_NUMBER = "7";
 const MAX_ATTEMPTS = 3;  //maximum number of times to attempt downloading a file before giving up
 const MAX_DOWNLOADS = 2; //maximum number of simultaneous downloads per program
-const DOWNLOAD_DIR = "./downloads"
+const DOWNLOAD_DIR = "C:/Users/joela/5fishInterface/nodeScripts/downloads"
 const FAIL_DELAY = 5000; //wait this many ms between download attempts
 
 // Include AdmZip class
@@ -185,11 +185,12 @@ emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilen
 		var zip;
 		try{
 			//it is now in a folder which shares it's name
+			console.log(custDir+"/"+zipFilename);
 			zip = new AdmZip(custDir+"/"+zipFilename);
 		}catch(error){
 			//log the error
 			console.log("\nError with " + zipFilename + "; oppening file led to an error:");
-			console.log(error + "\n");
+			console.error(error);
 
 			//delete the old file
 			//fs.unlinkSync(zipFilename);
@@ -430,9 +431,9 @@ let programIds = new Array();
 //make a unqiue directory for this specific request set
 
 let custDir;
-createZip(nums);
+var newDir = createZip(nums);
 
-res.download('C:/Users/joela/5fishInterface/nodeScripts' + nums[0])
+res.download('C:/Users/joela/5fishInterface/nodeScripts/downloads/' + newDir + "/" + nums[0])
 })
 
 module.exports = {
