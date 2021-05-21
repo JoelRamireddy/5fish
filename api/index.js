@@ -1,6 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const express = require('express')
 const app = express()
+var tools = require('../nodeScripts/zipper.js')
 
 
 app.get('/region/', (req, res) => {
@@ -99,8 +100,12 @@ app.get('/programs/:what', (req, res) => {
 })
 
 app.get('/download/:what',(req,res) => {
-	console.log(req.params.what);
-	return res.send('Received a PUT HTTP method');
+	
+	var nums = (req.params.what).split('.');
+	nums.unshift("GRN.fishies.zip");
+	tools.createZip(nums);
+	return res.send(nums);
+	
 })
 
 module.exports = {

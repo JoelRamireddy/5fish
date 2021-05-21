@@ -2,7 +2,7 @@
 const VERSION_NUMBER = "7";
 const MAX_ATTEMPTS = 3;  //maximum number of times to attempt downloading a file before giving up
 const MAX_DOWNLOADS = 2; //maximum number of simultaneous downloads per program 
-const DOWNLOAD_DIR = "./downloads"
+const DOWNLOAD_DIR = "../nodeScripts/downloads"
 const FAIL_DELAY = 5000; //wait this many ms between download attempts
 
 // Include AdmZip class
@@ -279,7 +279,7 @@ emitter.on("finish", function zipFile(outputFile) {
 	console.log("Done");
 });
 
-function createZip(args){
+export function createZip(args){
 	//set up drectories
 	fs.mkdirSync(custDir);
 

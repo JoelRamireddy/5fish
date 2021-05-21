@@ -26,7 +26,7 @@ export default {
     methods : {
         updateCart : function(){
             this.names = [];
-            this.progIds = [];
+            this.progIDs = [];
             //split into two arrays 
             for (var i = 0; i < this.checkedBoxes.length; i++){
                 //split based on the location of "=" 
@@ -41,13 +41,13 @@ export default {
         },
         resetCart : function(){
             this.names = [];
-            this.progIds = [];
+            this.progIDs = [];
         },
         downloadCart : function(){
             const axios = require('axios');
-            var addToString = "GRN.5fish.zip/";
+            var addToString = "";
             for(var i = 0; i < this.progIds.length-1; i++){
-                addToString += progIds[i].toString() + "&";
+                addToString += progIds[i].toString() + ".";
             }
             addToString += progIds[progIds.length-1];
             axios.get('http://localhost:3000/api/download/' + addToString).then(response => (this.places = response.data));
