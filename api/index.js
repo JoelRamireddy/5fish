@@ -180,7 +180,16 @@ emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilen
 	//catch any HTTP request errors
 	download(zipUrl, custDir)
 	.then(() => {
+    //update zipFilename to match the one actually downloaded
+		const files = fs.readdirSync(custDir);
+		for (const file of files) {
+  			if(file.indexOf(programId) != -1 && file.indexOf(".json") == -1){
+				zipFilename = file;
+				audioDirName = zipFilename.substring(0, zipFilename.indexOf(" - mp3"));
+			  }
+		}
 		console.log("Got " + zipFilename);
+
 		// Edit existing zip file
 		var zip;
 		try{
@@ -270,8 +279,20 @@ emitter.on("get_mp3_file", function getZipFile(zipFilename, programId, jsonFilen
 	var mp3FileName = zipFilename.substring(0, zipFilename.length - 3);
 	mp3FileName =  `${__dirname}` + "/" + mp3FileName + "mp3";
 
-	//need this sooner now...
-	const language = jsonData.languages[0].value;
+  //get the language. This can vary if there is puntuation. Remove any
+  	let language = jsonData.languages[0].value;
+  	// punctuation is always followed by a space
+  	// get the location of a space
+  	var spaceInd = language.indexOf(" ");
+  	if(spaceInd != -1){
+  		//make sure what precedes space is punctuation before cutting it out
+  		if((""+language.charAt(spaceInd-1)).match(/^([:;,.])/)){
+  			//cut out the unwanted value
+  			var tempBack = language.substring(0, spaceInd - 1);
+  			var tempFront = language.substring(spaceInd, language.length);
+  			language = tempBack + tempFront;
+  		}
+  	}
 			//this inner_dir is in english, while the audio files are in the directory written in their language
 			//const inner_dir = language+" "+jsonData.title+" "+programId;
 			//this inner_dir makes it match
@@ -413,7 +434,7 @@ function createZip(args){
 	programIds = programIds.slice(1);
 
 	//do the first MAX_DOWNLOADS
-	for(progInd = 0 ; progInd < MAX_DOWNLOADS ; progInd++){
+	for(progInd = 0 ; progInd < MAX_DOWNLOADS && progInd < programIds.length; progInd++){
 		emitter.emit("get_json_file", programIds[progInd], outputFile, 0);
 	}
   return newDir;
