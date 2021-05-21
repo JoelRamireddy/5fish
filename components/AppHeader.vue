@@ -6,7 +6,7 @@
               <nuxt-link to='/'>Home</nuxt-link>
           </li>
           <li>
-              <nuxt-link to='/jokes'>Programs</nuxt-link>
+              <nuxt-link to='/programs'>Programs</nuxt-link>
           </li>
           <li>
               <nuxt-link to='/about'>About</nuxt-link>
@@ -36,6 +36,7 @@ export default {
 }
 .header ul {
   display: flex;
+  list-style-type: none;
 }
 .header a {
   display: inline-block;

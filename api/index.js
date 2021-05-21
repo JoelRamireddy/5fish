@@ -100,8 +100,7 @@ app.get('/programs/:what', (req, res) => {
 })
 
 app.get('/download/:what',(req,res) => {
-	var nums = (req.params.what).split('.');
-	nums.unshift("GRN.fishies.zip");
+	var nums = (req.params.what).split('-');
 	// Version number declared in JSON
 const VERSION_NUMBER = "7";
 const MAX_ATTEMPTS = 3;  //maximum number of times to attempt downloading a file before giving up

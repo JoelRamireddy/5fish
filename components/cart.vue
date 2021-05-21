@@ -15,7 +15,7 @@
 
 <script>
 export default {
-    props : {checkedBoxes : Array, PORT_NUMBER : String},
+    props : {checkedBoxes : Array, PORT_NUMBER : String, fileName : String},
     data: function(){
         return{
             total : [], 
@@ -48,13 +48,14 @@ export default {
             this.done = true;
         },
         downloadCart : function(){
-            alert('Your download has begun')
+            console.log(this.fileName)
+            alert('Your Download has Begun.')
             const axios = require('axios');
             const FileDownload = require('js-file-download');
 
-            var addToString = "";
+            var addToString = "GRN." + this.fileName + ".zip-";
             for(var i = 0; i < this.progIDs.length-1; i++){
-                addToString += this.progIDs[i].toString() + ".";
+                addToString += this.progIDs[i].toString() + "-";
             }
             addToString += this.progIDs[this.progIDs.length-1];
             // axios.get('http://localhost:3000/api/download/' + addToString).then(response => (this.places = response.data));
@@ -64,7 +65,7 @@ export default {
             method: 'GET',
             responseType: 'blob', // Important
                 }).then((response) => {
-                FileDownload(response.data, 'GRN.fishies.zip');
+                FileDownload(response.data, 'GRN.'+ this.fileName +'.zip');
             });
             this.done = false;
         }

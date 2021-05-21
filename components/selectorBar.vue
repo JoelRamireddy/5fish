@@ -23,6 +23,10 @@
               <option v-bind:id = "language.langID" v-bind:value = "language.langID" v-for="language in languages" v-bind:key="language.langName">{{language.langName}}</option>
           </select>
       </div>
+      <div class="dropdown">
+          <span>File Name: </span>
+          <input type="text" v-model = "fileName" :disabled="programs.length == 0">
+      </div>
   </div>
   <div class="container">
     <ul id="lister">
@@ -35,7 +39,8 @@
   <div class = "button">
     <button v-on:click = "sendData">Get Programs</button>
   </div>
-  <cart ref = "form" v-bind:checkedBoxes = "checkedBoxes"/>
+  <cart ref = "form" v-bind:checkedBoxes = "checkedBoxes" v-bind:fileName = "fileName"/>
+
   <button id = "reset" v-on:click = "emptyCart">Reset Cart</button>
 </div>
 
@@ -54,7 +59,7 @@ data: function() {
       selectedContinent: "",
       selectedCountry: "",
       selectedLang: "",
-      PORT_NUMBER : "3000"
+      fileName : ""
     }
   },
   watch: {
