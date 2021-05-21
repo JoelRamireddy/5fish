@@ -1,11 +1,13 @@
 // Version number declared in JSON
 const VERSION_NUMBER = "7";
-const MAX_ATTEMPTS = 3; //maximum number of times to attempt downloading a file before giving up
+const MAX_ATTEMPTS = 3;  //maximum number of times to attempt downloading a file before giving up
+const MAX_DOWNLOADS = 2; //maximum number of simultaneous downloads per program 
 const DOWNLOAD_DIR = "./downloads"
-const FAIL_DELAY = 10000; //wait this many ms between download attempts
+const FAIL_DELAY = 5000; //wait this many ms between download attempts
 
 // Include AdmZip class
 var AdmZip = require("adm-zip");
+const download = require("download");
 
 // Final zip file data
 var zipInfo = new Array();
@@ -14,18 +16,23 @@ var zipInfo = new Array();
 var EventEmitter = require("events");
 var emitter = new EventEmitter();
 
+//let know if had to abandom file
+let wasError = false;
+
+
 emitter.on("get_json_file", function getJsonFile(programId, outputFile, numAttempts) {
 	// Get JSON data
 	var jsonUrl = "https://api.s.globalrecordings.net/feeds/set/"+programId+"?app=6";
-	var jsonFilename = DOWNLOAD_DIR+"/"+programId+"."+VERSION_NUMBER+".json";
+	var jsonFilename = custDir+"/"+programId+"."+VERSION_NUMBER+".json";
 	
 	const https = require("https");
-	const fs = require("fs");
 	var file = fs.createWriteStream(jsonFilename);
 	try{
+		console.log("Getting " + jsonFilename);
 		https.get(jsonUrl, function(res) {
 			res.pipe(file);
 			file.on("finish", function() {
+				console.log("Got " + jsonFilename);
 				file.close();
 				const fileData = fs.readFileSync(jsonFilename, "utf8");
 				const jsonData = JSON.parse(fileData);
@@ -51,30 +58,31 @@ emitter.on("get_json_file", function getJsonFile(programId, outputFile, numAttem
 			console.log("Getting " + jsonFilename + " again");
 			numAttempts++;
 			//wait one second
-			setTimeout(emitter.emit("get_json_file", val, outputFile, numAttempts), 1000);
+			setTimeout(emitter.emit("get_json_file", val, outputFile, numAttempts), FAIL_DELAY);
 		}else {
 			console.log("Failed to download " + jsonFilename + " " + numAttempts + " times. Giving up");
+			wasError = true;
+			numProgsDone++;
 		}	
 	}
 });
 
 emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilename, jsonData, audioDirName, outputFile, numAttempts) {
 	const https = require("https");
-	const fs = require("fs");
 	const download = require('download');
 	
 	var zipUrl = "https://api.globalrecordings.net/files/set/mp3-low/"+programId+".zip";
 
-	console.log("getting " + zipFilename);
+	console.log("Getting " + zipFilename);
 	//catch any HTTP request errors
-	download(zipUrl, DOWNLOAD_DIR)
+	download(zipUrl, custDir)
 	.then(() => {
-		console.log("got " + zipFilename);
+		console.log("Got " + zipFilename);
 		// Edit existing zip file
 		var zip;
 		try{
 			//it is now in a folder which shares it's name
-			zip = new AdmZip(DOWNLOAD_DIR+"/"+zipFilename);
+			zip = new AdmZip(custDir+"/"+zipFilename);
 		}catch(error){
 			//log the error
 			console.log("\nError with " + zipFilename + "; oppening file led to an error:");
@@ -85,12 +93,28 @@ emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilen
 			return;
 		}
 
-		const language = jsonData.languages[0].value;
+		//get the language. This can vary if there is puntuation. Remove any
+		let language = jsonData.languages[0].value;
+		//punctuation is always followed by a space
+		//get the location of a space
+		var spaceInd = language.indexOf(" ");
+		if(spaceInd != -1){
+			//make sure what precedes space is punctuation before cutting it out
+			if((""+language.charAt(spaceInd-1)).match(/^([:;,.])/)){
+				//cut out the unwanted value
+				var tempBack = language.substring(0, spaceInd - 1);
+				var tempFront = language.substring(spaceInd, language.length);
+				language = tempBack + tempFront;
+			}
+		}
+
 		//this inner_dir is in english, while the audio files are in the directory written in their language
 		//const inner_dir = language+" "+jsonData.title+" "+programId;
 		//this inner_dir makes it match
 		const inner_dir = audioDirName;
-		console.log(inner_dir);
+		
+
+		//console.log(inner_dir);
 
 		zip.addLocalFile(jsonFilename, language+"/"+inner_dir);
 
@@ -100,15 +124,19 @@ emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilen
 			entry.header.flags |= 0x800;   // Set bit 11 - APP Note 4.4.4 Language encoding flag (EFS)
 		});
 
-		zip.writeZip(DOWNLOAD_DIR+"/"+zipFilename);
+		zip.writeZip(custDir+"/"+zipFilename);
 
 		//store the zip file downloaded and the language of the program
-		zipInfo.push({file: DOWNLOAD_DIR+"/"+zipFilename, lang: language, dir: inner_dir}); 
+		zipInfo.push({file: custDir+"/"+zipFilename, lang: language, dir: inner_dir}); 
 
 		//keep track of how many programs have been processed and only finish after last
 		numProgsDone++;
 		if(numProgsDone == numProgs){
 			emitter.emit("finish", outputFile);
+		} else if(progInd < numProgs) {
+			//if not done, try to send the next as long as any request are left to make
+			emitter.emit("get_json_file", programIds[progInd], outputFile, 0);
+			progInd++;
 		}
 	})
 	.catch(error => {
@@ -123,6 +151,8 @@ emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilen
 			setTimeout(() => {emitter.emit("get_zip_file", zipFilename, programId, jsonFilename, jsonData, audioDirName, outputFile, numAttempts)}, FAIL_DELAY);
 		}else {
 			console.log("Failed to download " + zipFilename + " " + numAttempts + " times. Giving up");
+			wasError = true;
+			numProgsDone++;
 		}	
 	});
 });
@@ -130,16 +160,12 @@ emitter.on("get_zip_file", function getZipFile(zipFilename, programId, jsonFilen
 
 //alternate handling for lone MP3 files
 emitter.on("get_mp3_file", function getZipFile(zipFilename, programId, jsonFilename, jsonData, audioDirName, outputFile, numAttempts) {
-	const fs = require("fs");
 	const download = require('download');
 
 	var mp3Url = "https://api.globalrecordings.net/files/set/mp3-low/"+programId+".mp3";
 	//change from zip to mp3
 	var mp3FileName = zipFilename.substring(0, zipFilename.length - 3);
 	mp3FileName =  `${__dirname}` + "/" + mp3FileName + "mp3";
-	console.log("getting " + mp3FileName + " from " + mp3Url);
-	
-
 
 	//need this sooner now...
 	const language = jsonData.languages[0].value;
@@ -147,9 +173,12 @@ emitter.on("get_mp3_file", function getZipFile(zipFilename, programId, jsonFilen
 			//const inner_dir = language+" "+jsonData.title+" "+programId;
 			//this inner_dir makes it match
 	const inner_dir = audioDirName;
-	download(mp3Url, DOWNLOAD_DIR)
+
+	console.log("Getting " + mp3FileName);
+
+	download(mp3Url, custDir)
 	.then(() => {
-		console.log("got " + mp3FileName);
+		console.log("Got " + mp3FileName);
 
 		//the file will be ####.mp3 inside of a folder with name mp3FileName
 
@@ -157,7 +186,7 @@ emitter.on("get_mp3_file", function getZipFile(zipFilename, programId, jsonFilen
 		var zip;
 		try{
 			zip = new AdmZip();
-			zip.addLocalFile(DOWNLOAD_DIR+"/"+programId + ".mp3", language+"/"+inner_dir);
+			zip.addLocalFile(custDir+"/"+programId + ".mp3", language+"/"+inner_dir);
 		}catch(error){
 			//log the error
 			console.log("\nError with " + mp3FileName + "; oppening file led to the error:");
@@ -182,15 +211,19 @@ emitter.on("get_mp3_file", function getZipFile(zipFilename, programId, jsonFilen
 		});
 
 
-		zip.writeZip(DOWNLOAD_DIR+"/"+zipFilename);
+		zip.writeZip(custDir+"/"+zipFilename);
 
 		//store the zip file downloaded and the language of the program
-		zipInfo.push({file: DOWNLOAD_DIR+"/"+zipFilename, lang: language, dir: inner_dir}); 
+		zipInfo.push({file: custDir+"/"+zipFilename, lang: language, dir: inner_dir}); 
 
 		//keep track of how many programs have been processed and only finish after last
 		numProgsDone++;
 		if(numProgsDone == numProgs){
 			emitter.emit("finish", outputFile);
+		}else if(progInd < numProgs) {
+			//if not done, try to send the next as long as any request are left to make
+			emitter.emit("get_json_file", programIds[progInd], outputFile, 0);
+			progInd++;
 		}
 	})
 	.catch(error => {
@@ -205,6 +238,8 @@ emitter.on("get_mp3_file", function getZipFile(zipFilename, programId, jsonFilen
 			setTimeout(() => {emitter.emit("get_mp3_file", zipFilename, programId, jsonFilename, jsonData, audioDirName, outputFile, numAttempts)}, FAIL_DELAY);
 		}else {
 			console.log("Failed to download " + mp3FileName + " " + numAttempts + " times. Giving up");
+			wasError = true;
+			numProgsDone++;
 		}
 	});
 });
@@ -220,7 +255,7 @@ emitter.on("finish", function zipFile(outputFile) {
 		//unzip the entire directory; it only contains one program
 //node: if we do it by file, just use the getEntries and pull out files by name to get entryName to extract file by file
 		var tempZip = new AdmZip(val.file);
-		var newFolderName = DOWNLOAD_DIR+"/temp"; //want to erase previous work every time
+		var newFolderName = custDir+"/temp"; //want to erase previous work every time
 		tempZip.extractAllTo(newFolderName, true); 
 		//var entry = tempZip.getEntry(val.lang);
 		console.log(newFolderName+"/"+val.lang+"/"+val.dir,"/"+val.lang);
@@ -239,23 +274,17 @@ emitter.on("finish", function zipFile(outputFile) {
 
 	zip.addLocalFile('5fish.json');
 	zip.addLocalFile('readme.txt');
-	zip.writeZip(DOWNLOAD_DIR+"/"+outputFile)
+	zip.writeZip(custDir+"/"+outputFile)
 
 	console.log("Done");
 });
 
-
-//global vars
-let numProgs; //global to store number of args so know when to finish
-let numProgsDone = 0;
-
-// Retrieve cmd line args
-const args = process.argv.slice(2);
-createZip(args);
-
 function createZip(args){
-	
-	var programIds = new Array();
+	//set up drectories
+	fs.mkdirSync(custDir);
+
+
+	//let programIds = new Array();
 	numProgs = args.length - 1;
 	console.log(numProgs);
 
@@ -270,15 +299,35 @@ function createZip(args){
 	});
 
 	//now request each item retrieved	
-	const fs = require("fs");
 	var AdmZip = require("adm-zip");
 	var zipFile = new AdmZip();
 
 	var outputFile = programIds[0];
-	var programIds = programIds.slice(1);
+	programIds = programIds.slice(1);
 
-	programIds.forEach((val, index) => {
-		emitter.emit("get_json_file", val, outputFile, 0);	
-	});	
+	//do the first MAX_DOWNLOADS 
+	for(progInd = 0 ; progInd < MAX_DOWNLOADS ; progInd++){
+		emitter.emit("get_json_file", programIds[progInd], outputFile, 0);
+	}
 }
+
+const fs = require("fs");
+
+//global vars
+let numProgs; //global to store number of args so know when to finish
+let numProgsDone = 0;
+let progInd = 0; //use this to keep track of which program to download next
+let programIds = new Array();
+
+//make a unqiue directory for this specific request set
+var newDir = (Math.floor(Math.random()*1000)).toString();
+let custDir = DOWNLOAD_DIR + "/" + newDir;
+
+// Retrieve cmd line args
+const args = process.argv.slice(2);
+createZip(args);
+
+
+
+
 
