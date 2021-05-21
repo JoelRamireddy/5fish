@@ -28,7 +28,7 @@ emitter.on("get_json_file", function getJsonFile(programId, outputFile, numAttem
 	const https = require("https");
 	var file = fs.createWriteStream(jsonFilename);
 	try{
-		console.log("Getting " + jsonFilename);
+		console.log("Getting " + jsonFilename + "from " + jsonUrl);
 		https.get(jsonUrl, function(res) {
 			res.pipe(file);
 			file.on("finish", function() {
@@ -298,9 +298,14 @@ function createZip(args){
 		return;
 	}
 	
+	system.out.println();
+
 	args.forEach((val, index) => {
 		programIds.push(val);
 	});
+
+	system.out.println(programIds);
+	system.out.println("**************************");
 
 	//now request each item retrieved	
 	var AdmZip = require("adm-zip");
@@ -310,7 +315,7 @@ function createZip(args){
 	programIds = programIds.slice(1);
 
 	//do the first MAX_DOWNLOADS 
-	for(progInd = 0 ; progInd < MAX_DOWNLOADS ; progInd++){
+	for(progInd = 0 ; progInd < MAX_DOWNLOADS && progInd < programIds.length; progInd++){
 		emitter.emit("get_json_file", programIds[progInd], outputFile, 0);
 	}
 }
