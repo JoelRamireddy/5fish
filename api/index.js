@@ -108,7 +108,7 @@ app.get('/download/:what',(req,res) => {
 const VERSION_NUMBER = "7";
 const MAX_ATTEMPTS = 3;  //maximum number of times to attempt downloading a file before giving up
 const MAX_DOWNLOADS = 2; //maximum number of simultaneous downloads per program
-const DOWNLOAD_DIR = "api/downloads"
+const DOWNLOAD_DIR = "nodeScripts/downloads"
 const FAIL_DELAY = 5000; //wait this many ms between download attempts
 
 // Include AdmZip class
@@ -402,10 +402,10 @@ emitter.on("finish", function zipFile(outputFile) {
 
 	zip.addLocalFile('api/5fish.json');
 	zip.addLocalFile('api/readme.txt');
-	zip.writeZip(custDir+"/"+outputFile)
+	zip.writeZip(custDir+"/"+outputFile);
 
 	console.log("Done");
-	res.download(custDir+"/"+outputFile)
+	res.download(custDir+"/"+outputFile);
 });
 
 

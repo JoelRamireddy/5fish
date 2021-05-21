@@ -54,7 +54,7 @@ export default {
             addToString += this.progIDs[this.progIDs.length-1];
             // axios.get('http://localhost:3000/api/download/' + addToString).then(response => (this.places = response.data));
             
-
+            console.log("am i even here yet");
             axios({
             url: 'http://localhost:3000/api/download/' + addToString,
             method: 'GET',
