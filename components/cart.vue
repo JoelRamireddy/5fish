@@ -58,7 +58,7 @@ export default {
             // axios.get('http://localhost:3000/api/download/' + addToString).then(response => (this.places = response.data));
             this.done = true;
             axios({
-            url: 'http://localhost:51588/api/download/' + addToString,
+            url: 'http://localhost:3000/api/download/' + addToString,
             method: 'GET',
             responseType: 'blob', // Important
                 }).then((response) => {

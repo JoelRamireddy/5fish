@@ -4,7 +4,6 @@ const app = express()
 
 
 app.get('/region/', (req, res) => {
-	
 	let db = new sqlite3.Database('./5fish.db');
 
     let sql = `select  grn_location_id, default_location_name
@@ -24,7 +23,6 @@ app.get('/region/', (req, res) => {
 
 	// close the database connection
 	db.close();
-
 })
 
 app.get('/country/:what', (req, res) => {
@@ -405,7 +403,17 @@ emitter.on("finish", function zipFile(outputFile) {
 	zip.writeZip(custDir+"/"+outputFile);
 
 	console.log("Done");
-	res.download(custDir+"/"+outputFile);
+	res.download(custDir+"/"+outputFile, function(err){
+		fs.rmdir(custDir, {recursive: true}, (err) => {
+			if(err){
+				console.log("Failed to delete " + custDir);
+			}else{
+				console.log("Deleted " + custDir);
+			}
+		});
+	});
+
+	//delete directory to cleanup after
 });
 
 
@@ -442,7 +450,7 @@ function createZip(args){
 	for(progInd = 0 ; progInd < MAX_DOWNLOADS && progInd < programIds.length; progInd++){
 		emitter.emit("get_json_file", programIds[progInd], outputFile, 0);
 	}
-	console.log("I am here, hello");
+
   return newDir;
 }
 
