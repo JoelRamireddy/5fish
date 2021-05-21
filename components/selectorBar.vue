@@ -74,19 +74,19 @@ data: function() {
       this.languages = [];
       // Now we have a continent and country. Populate list of languages in the third dropdown
       const axios = require('axios');
-      axios.get('http://localhost:' + this.PORT_NUMBER + '/api/languages/' + (this.selectedCountry).toString()).then(response => (this.languages = response.data));
+      axios.get('http://localhost:3000/api/languages/' + (this.selectedCountry).toString()).then(response => (this.languages = response.data));
     },
     selectedLang: function() {
       console.log("here");  
       const axios = require('axios');
       console.log((this))
-      axios.get('http://localhost:' + this.PORT_NUMBER + '/api/programs/' + (this.selectedLang).toString()).then(response => (this.programs = response.data));
+      axios.get('http://localhost:3000/api/programs/' + (this.selectedLang).toString()).then(response => (this.programs = response.data));
       console.log((this.selectedLang).toString())
     }
 },
 created(){
     const axios = require('axios');
-    axios.get('http://localhost:' + this.PORT_NUMBER + '/api/region/')
+    axios.get('http://localhost:3000/api/region/')
     .then(response => (this.places = response.data));
 },
 methods: {
