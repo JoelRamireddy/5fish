@@ -9,7 +9,8 @@ app.get('/region/', (req, res) => {
 
     let sql = `select  grn_location_id, default_location_name
            from Location
-           where Location.parent_location_id is null`;
+           where Location.parent_location_id is null
+					 order by default_location_name asc`;
 
 	db.all(sql, [], (err, rows) => {
 		if (err) {
@@ -34,7 +35,8 @@ app.get('/country/:what', (req, res) => {
 	where Location.parent_location_id in
 		(select Location.grn_location_id
 		from Location
-		where Location.parent_location_id = ?)`;
+		where Location.parent_location_id = ?)
+	order by default_location_name asc`;
 
 	db.all(sql, [req.params.what], (err, rows) => {
 		if (err) {
@@ -58,7 +60,8 @@ app.get('/languages/:what', (req, res) => {
 	from Languages inner join LocationLanguages on
 		(Languages.grn_language_id = LocationLanguages.language_id)
 		 inner join Location on (LocationLanguages.location_id = Location.grn_location_id)
-	where Location.grn_location_id = ?`;
+	where Location.grn_location_id = ?
+	order by langName asc`;
 
 	db.all(sql, [req.params.what], (err, rows) => {
 		if (err) {
@@ -105,7 +108,7 @@ app.get('/download/:what',(req,res) => {
 const VERSION_NUMBER = "7";
 const MAX_ATTEMPTS = 3;  //maximum number of times to attempt downloading a file before giving up
 const MAX_DOWNLOADS = 2; //maximum number of simultaneous downloads per program
-const DOWNLOAD_DIR = "C:/Users/joela/5fishInterface/nodeScripts/downloads"
+const DOWNLOAD_DIR = "api/downloads"
 const FAIL_DELAY = 5000; //wait this many ms between download attempts
 
 // Include AdmZip class
@@ -397,8 +400,8 @@ emitter.on("finish", function zipFile(outputFile) {
 		entry.header.flags |= 0x800;   // Set bit 11 - APP Note 4.4.4 Language encoding flag (EFS)
 	});
 
-	zip.addLocalFile('C:/Users/joela/5fishInterface/api/5fish.json');
-	zip.addLocalFile('C:/Users/joela/5fishInterface/api/readme.txt');
+	zip.addLocalFile('api/5fish.json');
+	zip.addLocalFile('api/readme.txt');
 	zip.writeZip(custDir+"/"+outputFile)
 
 	console.log("Done");
