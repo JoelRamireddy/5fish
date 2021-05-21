@@ -48,6 +48,7 @@ export default {
             this.done = true;
         },
         downloadCart : function(){
+            alert('Your download has begun')
             const axios = require('axios');
             const FileDownload = require('js-file-download');
 

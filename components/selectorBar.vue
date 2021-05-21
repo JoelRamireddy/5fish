@@ -27,7 +27,7 @@
   <div class="container">
     <ul id="lister">
       <li v-for="program in programs" v-bind:key="program.progName">
-        <input type="checkbox" v-bind:id = "program.progID" v-model="checkedBoxes" :value="program.progID + '= ' + program.progName  + '-' + program.langName">
+        <input type="checkbox" v-bind:id = "program.progID" v-model="checkedBoxes" :value="program.progID + '= ' + program.langName + ' - ' + program.progName">
         {{program.progName}}
       </li>
     </ul>
@@ -91,12 +91,12 @@ created(){
 },
 methods: {
   sendData: function(){
-    this.$refs.form.updateCart()
+    this.$refs.form.updateCart();
   },
   emptyCart : function(){
             this.$refs.form.resetCart();
             this.checkedBoxes = [];
-  },
+  }
 },
 components:{
   cart
