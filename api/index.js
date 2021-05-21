@@ -105,7 +105,7 @@ app.get('/download/:what',(req,res) => {
 const VERSION_NUMBER = "7";
 const MAX_ATTEMPTS = 3;  //maximum number of times to attempt downloading a file before giving up
 const MAX_DOWNLOADS = 2; //maximum number of simultaneous downloads per program 
-const DOWNLOAD_DIR = "C:/Users/joela/5fishInterface"
+const DOWNLOAD_DIR = "C:/Users/joela/5fishInterface/nodeScripts"
 const FAIL_DELAY = 5000; //wait this many ms between download attempts
 
 // Include AdmZip class
@@ -430,7 +430,8 @@ let programIds = new Array();
 
 let custDir;
 createZip(nums);
-return res.send(nums);
+
+res.download('C:/Users/joela/5fishInterface/nodeScripts' + nums[0])
 })
 
 module.exports = {
