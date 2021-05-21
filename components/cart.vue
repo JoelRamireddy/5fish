@@ -53,11 +53,19 @@ export default {
             const axios = require('axios');
             const FileDownload = require('js-file-download');
 
+            //file types
+            const GRN_VIDEO = "GV:";
+            const JESUS_FILM = "JF:";
+            const LANG_SAMPLE = "LS";
+            const IMAGE = "IM";
+            const GRN_AUDIO = "GA";
+
             var addToString = "GRN." + this.fileName + ".zip-";
             for(var i = 0; i < this.progIDs.length-1; i++){
-                addToString += this.progIDs[i].toString() + "-";
+                //make all audio by default, make this dynamic later; frontend can't do 
+                addToString += GRN_AUDIO + ":" + this.progIDs[i].toString() + "-";
             }
-            addToString += this.progIDs[this.progIDs.length-1];
+            addToString += GRN_AUDIO + ":" + this.progIDs[this.progIDs.length-1];
             // axios.get('http://localhost:3000/api/download/' + addToString).then(response => (this.places = response.data));
             this.done = true;
             axios({
