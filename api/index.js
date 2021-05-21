@@ -4,7 +4,7 @@ const app = express()
 
 
 app.get('/region/', (req, res) => {
-
+	
 	let db = new sqlite3.Database('./5fish.db');
 
     let sql = `select  grn_location_id, default_location_name
@@ -397,11 +397,12 @@ emitter.on("finish", function zipFile(outputFile) {
 		entry.header.flags |= 0x800;   // Set bit 11 - APP Note 4.4.4 Language encoding flag (EFS)
 	});
 
-	zip.addLocalFile('5fish.json');
-	zip.addLocalFile('readme.txt');
+	zip.addLocalFile('C:/Users/joela/5fishInterface/api/5fish.json');
+	zip.addLocalFile('C:/Users/joela/5fishInterface/api/readme.txt');
 	zip.writeZip(custDir+"/"+outputFile)
 
 	console.log("Done");
+	res.download(custDir+"/"+outputFile)
 });
 
 
@@ -438,6 +439,7 @@ function createZip(args){
 	for(progInd = 0 ; progInd < MAX_DOWNLOADS && progInd < programIds.length; progInd++){
 		emitter.emit("get_json_file", programIds[progInd], outputFile, 0);
 	}
+	console.log("I am here, hello");
   return newDir;
 }
 
@@ -454,8 +456,8 @@ let programIds = new Array();
 let custDir;
 var newDir = createZip(nums);
 
-res.download('C:/Users/joela/5fishInterface/nodeScripts/downloads/' + newDir + "/" + nums[0])
 })
+
 
 module.exports = {
    path: '/api',

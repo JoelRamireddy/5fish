@@ -45,12 +45,23 @@ export default {
         },
         downloadCart : function(){
             const axios = require('axios');
+            const FileDownload = require('js-file-download');
+
             var addToString = "";
             for(var i = 0; i < this.progIDs.length-1; i++){
                 addToString += this.progIDs[i].toString() + ".";
             }
             addToString += this.progIDs[this.progIDs.length-1];
-            axios.get('http://localhost:3000/api/download/' + addToString).then(response => (this.places = response.data));
+            // axios.get('http://localhost:3000/api/download/' + addToString).then(response => (this.places = response.data));
+            
+
+            axios({
+            url: 'http://localhost:3000/api/download/' + addToString,
+            method: 'GET',
+            responseType: 'blob', // Important
+                }).then((response) => {
+                FileDownload(response.data, 'GRN.fishies.zip');
+            });
         }
     }
 }

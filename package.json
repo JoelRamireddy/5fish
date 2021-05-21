@@ -17,6 +17,7 @@
     "express": "^4.17.1",
     "fs": "0.0.1-security",
     "https": "^1.0.0",
+    "js-file-download": "^0.4.12",
     "nuxt": "^2.15.6",
     "sqlite3": "^5.0.2",
     "vue-dock-menu": "^1.0.3",
