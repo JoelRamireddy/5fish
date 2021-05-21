@@ -34,7 +34,6 @@
   </div>
   <div class = "button">
     <button v-on:click = "sendData">Get Programs</button>
-    <span>checked names: {{checkedBoxes}}</span>
   </div>
   <cart ref = "form" v-bind:checkedBoxes = "checkedBoxes"/>
 </div>
@@ -136,6 +135,9 @@ components:{
   overflow-y: scroll;
   position: relative;
   display: inline-block;
-  left: 50%;
-  transform: translate(-50%, 0%);}
+  left: 0%;
+  transform: translate(0%, 7%);}
+
+
+
 </style>

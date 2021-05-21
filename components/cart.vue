@@ -1,13 +1,15 @@
 <template>
+<div>
   <div class="something">
-    <!-- <ul id="lister">
-      <li v-for="program in programs" v-bind:key="program.progName">
-        <input type="checkbox" v-bind:id = "program.progID" v-model="checkedBoxes" :value="program.progID">
-        {{program.progName}}
+    <ul id="lister">
+      <li v-for="name of names" v-bind:key="name.name">
+        {{name}}
       </li>
-    </ul> -->
-    <span>{{checkedBoxes}}</span>
+    </ul>
   </div>
+  <button id = "reset" v-on:click = "resetCart">Reset Cart</button>
+  <button id = "download" v-on:click = "downloadCart">Download</button>
+</div>
 </template>
 
 <script>
@@ -23,6 +25,8 @@ export default {
     },
     methods : {
         updateCart : function(){
+            this.names = [];
+            this.progIds = [];
             //split into two arrays 
             for (var i = 0; i < this.checkedBoxes.length; i++){
                 //split based on the location of "=" 
@@ -30,10 +34,23 @@ export default {
                 var ind = temp.indexOf("=");
                 var tempID = temp.substring(0, ind);
                 var tempName = temp.substring(ind+1, temp.length);
-                progIDs.push(tempID);
-                names.push(tempName);
+                this.progIDs.push(tempID);
+                this.names.push(tempName);
             }
-            console.log(this.total)
+            console.log(this.progIDs)
+        },
+        resetCart : function(){
+            this.names = [];
+            this.progIds = [];
+        },
+        downloadCart : function(){
+            const axios = require('axios');
+            var addToString = "GRN.5fish.zip/";
+            for(var i = 0; i < this.progIds.length-1; i++){
+                addToString += progIds[i].toString() + "&";
+            }
+            addToString += progIds[progIds.length-1];
+            axios.get('http://localhost:3000/api/download/' + addToString).then(response => (this.places = response.data));
         }
     }
 }
@@ -48,6 +65,19 @@ export default {
   overflow-y: scroll;
   position: relative;
   display: inline-block;
-  left: 50%;
-  transform: translate(-50%, 0%);}
+  left: 100%;
+  transform: translate(-100%, -100%);}
+
+  #reset{
+      position: relative;
+      left:19%;
+      transform: translate(-50%, -2000%)
+  }
+
+  #download{
+      position: relative;
+      left:13.9%;
+      transform: translate(-50%, -2400%)
+  }
+
 </style>

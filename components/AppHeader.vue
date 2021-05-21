@@ -1,12 +1,12 @@
 <template>
   <header class = "header">
-      <h1 class = "title">5Fish app</h1>
+      <h1 class = "title">GRN Zip Downloader</h1>
       <ul>
           <li>
               <nuxt-link to='/'>Home</nuxt-link>
           </li>
           <li>
-              <nuxt-link to='/jokes'>Jokes</nuxt-link>
+              <nuxt-link to='/jokes'>Programs</nuxt-link>
           </li>
           <li>
               <nuxt-link to='/about'>About</nuxt-link>
