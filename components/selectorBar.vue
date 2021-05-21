@@ -36,6 +36,7 @@
     <button v-on:click = "sendData">Get Programs</button>
   </div>
   <cart ref = "form" v-bind:checkedBoxes = "checkedBoxes"/>
+  <button id = "reset" v-on:click = "emptyCart">Reset Cart</button>
 </div>
 
 </template>
@@ -63,7 +64,7 @@ data: function() {
       this.selectedCountry = "";
       // Populate list of countries in the second dropdown
       const axios = require('axios');
-      axios.get('http://localhost:3000/api/country/' + (this.selectedContinent).toString())
+      axios.get('http://localhost:51588/api/country/' + (this.selectedContinent).toString())
       .then(response => (this.countries = response.data));
       
     },
@@ -72,25 +73,29 @@ data: function() {
       this.languages = [];
       // Now we have a continent and country. Populate list of languages in the third dropdown
       const axios = require('axios');
-      axios.get('http://localhost:3000/api/languages/' + (this.selectedCountry).toString()).then(response => (this.languages = response.data));
+      axios.get('http://localhost:51588/api/languages/' + (this.selectedCountry).toString()).then(response => (this.languages = response.data));
     },
     selectedLang: function() {
       console.log("here");  
       const axios = require('axios');
       console.log((this))
-      axios.get('http://localhost:3000/api/programs/' + (this.selectedLang).toString()).then(response => (this.programs = response.data));
+      axios.get('http://localhost:51588/api/programs/' + (this.selectedLang).toString()).then(response => (this.programs = response.data));
       console.log((this.selectedLang).toString())
     }
 },
 created(){
     const axios = require('axios');
-    axios.get('http://localhost:3000/api/region/')
+    axios.get('http://localhost:51588/api/region/')
     .then(response => (this.places = response.data));
 },
 methods: {
   sendData: function(){
     this.$refs.form.updateCart()
-  }
+  },
+  emptyCart : function(){
+            this.$refs.form.resetCart();
+            this.checkedBoxes = [];
+  },
 },
 components:{
   cart
@@ -138,6 +143,10 @@ components:{
   left: 0%;
   transform: translate(0%, 7%);}
 
-
+#reset{
+      position: relative;
+      left:50%;
+      transform: translate(-50%, -2000%)
+  }
 
 </style>

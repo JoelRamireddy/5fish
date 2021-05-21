@@ -7,8 +7,8 @@
       </li>
     </ul>
   </div>
-  <button id = "reset" v-on:click = "resetCart">Reset Cart</button>
-  <button id = "download" v-on:click = "downloadCart">Download</button>
+  
+  <button id = "download" v-on:click = "downloadCart" :disabled = "done == true">Download</button>
 </div>
 </template>
 
@@ -19,12 +19,14 @@ export default {
         return{
             total : [], 
             progIDs : [],
-            names : []
+            names : [],
+            done : true
         }
 
     },
     methods : {
         updateCart : function(){
+            this.done = false;
             this.names = [];
             this.progIDs = [];
             //split into two arrays 
@@ -42,6 +44,7 @@ export default {
         resetCart : function(){
             this.names = [];
             this.progIDs = [];
+            this.done = true;
         },
         downloadCart : function(){
             const axios = require('axios');
@@ -53,13 +56,15 @@ export default {
             }
             addToString += this.progIDs[this.progIDs.length-1];
             // axios.get('http://localhost:3000/api/download/' + addToString).then(response => (this.places = response.data));
+            this.done = true;
             axios({
-            url: 'http://localhost:3000/api/download/' + addToString,
+            url: 'http://localhost:51588/api/download/' + addToString,
             method: 'GET',
             responseType: 'blob', // Important
                 }).then((response) => {
                 FileDownload(response.data, 'GRN.fishies.zip');
             });
+            this.done = false;
         }
     }
 }
@@ -77,16 +82,12 @@ export default {
   left: 100%;
   transform: translate(-100%, -100%);}
 
-  #reset{
-      position: relative;
-      left:19%;
-      transform: translate(-50%, -2000%)
-  }
+  
 
   #download{
       position: relative;
-      left:13.9%;
-      transform: translate(-50%, -2400%)
+      left:19%;
+      transform: translate(-50%, -2200%)
   }
 
 </style>
