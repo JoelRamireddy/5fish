@@ -52,7 +52,7 @@ The backend zip creator is broken into a callable function and several asychronu
 
 createZip(Args) takes an array with the first element being the name of the zip file to be created and the remaining elements being the program ID's to be included, and then triggers. It then starts a number of synchronus downloads equal to the max provided by the API, which is currently 2. 
 
-The get_json_file program downloads the json file from GRN's API that coresponds to the ID. The program then uses a prefix attached to the ID to find which kind of file to download. Currenty only GRN audio files are supported, but the foudnation to allow other types of file downloads is there. 
+The get_json_file program downloads the json file from GRN's API that coresponds to the ID. The program then uses a prefix attached to the ID to find which kind of file to download. Currenty only GRN audio files are supported, but the foundation to allow other types of file downloads is there. 
 
 From here the get_zip_file or get_mp3_file event is trigered depending on if the file downloads as a zip of multiple files or a single mp3. The files are formated to be a zip with the .json file in the program directory. On finishing, each ansynchronus event will trigger the next one in line. 
 
@@ -73,7 +73,7 @@ Add functionality for GRN video, Jesus Film, language samples, and images to the
 
 Add the ability to select individual tracks from a program.
 
-Change the way the json file is installed to match the way the rest of the files are installed. The sytax and error handling look neater with the download library rather than ussing fs.
+Change the way the json file is installed to match the way the rest of the files are installed. The sytax and error handling look neater with the download library rather than using fs.
 
 Note that the about page was largly added as a nod to everyone who helped on the project; there is no pressure to keep the credits in a prominent location like that. 
 

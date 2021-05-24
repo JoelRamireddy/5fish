@@ -1,7 +1,7 @@
 # Build image
 FROM node:lts AS build
 WORKDIR /build
-COPY package.json package-lock.json .
+COPY package.json package-lock.json ./
 RUN npm install --no-fund
 COPY . ./
 RUN npm run build
@@ -12,7 +12,7 @@ RUN apk add npm
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install --production --no-fund
-COPY --from=build /build .
+COPY --from=build /build ./
 RUN chown -R node .
 
 ARG NODE_PORT=8080
