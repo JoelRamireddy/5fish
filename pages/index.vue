@@ -10,7 +10,7 @@
 export default {
   head(){
       return {
-          title: "Welcome to 5Fish",
+          title: "Welcome to 5fish",
           meta: [
               {hid: "description",
               name: "description",
